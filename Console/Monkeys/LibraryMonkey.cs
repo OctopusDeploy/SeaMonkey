@@ -2,7 +2,10 @@
 using Octopus.Client;
 using Octopus.Client.Model;
 using System;
+using System.IO;
+using ICSharpCode.SharpZipLib.Zip;
 using Octopus.Client.Model.Accounts;
+using Serilog;
 
 namespace SeaMonkey.Monkeys
 {
@@ -21,6 +24,7 @@ namespace SeaMonkey.Monkeys
             CreateScriptModules(numberOfScriptModules);
             CreateLibraryVariableSets(numberOfLibraryVariableSets);
             CreateTenantTagSets(numberOfTenantTagSets);
+            CreateAcmePackages(10);
         }
 
         #region Feeds
@@ -82,7 +86,8 @@ namespace SeaMonkey.Monkeys
                 Repository.LibraryVariableSets.Create(new LibraryVariableSetResource()
                 {
                     Name = "LibraryVariableSet-" + prefix.ToString("000"),
-                    Description = "Rick: Uh-huh, yeah, that’s the difference between you and me, Morty. I never go back to the carpet store"
+                    Description =
+                        "Rick: Uh-huh, yeah, that’s the difference between you and me, Morty. I never go back to the carpet store"
                 });
         }
 
@@ -103,11 +108,52 @@ namespace SeaMonkey.Monkeys
                 Repository.TagSets.Create(new TagSetResource()
                 {
                     Name = "TenantTagSet-" + prefix.ToString("000"),
-                    Description = "Listen, Morty, I hate to break it to you but what people call 'love' is just a chemical reaction that compels animals to breed. It hits hard, Morty, then it slowly fades, leaving you stranded in a failing marriage. I did it. Your parents are gonna do it. Break the cycle, Morty. Rise above. Focus on science"
+                    Description =
+                        "Listen, Morty, I hate to break it to you but what people call 'love' is just a chemical reaction that compels animals to breed. It hits hard, Morty, then it slowly fades, leaving you stranded in a failing marriage. I did it. Your parents are gonna do it. Break the cycle, Morty. Rise above. Focus on science"
                 });
         }
 
         #endregion
 
+        public void CreateAcmePackages(int numberOfPackages)
+        {
+            var filename = Path.GetTempFileName();
+            try
+            {
+                var packages = Repository.BuiltInPackageRepository.ListPackages("Acme.Web", take: int.MaxValue);
+                using (var ms = new MemoryStream(GetRandomZipFile()))
+                {
+                    for (var x = packages.Items.Count; x <= numberOfPackages; x++)
+                    {
+                        ms.Seek(0, SeekOrigin.Begin);
+                        var packageId = $"Acme.Web.1.{x}.0.zip";
+                        Log.Information("Pushing package {package}", packageId);
+                        Repository.BuiltInPackageRepository.PushPackage(packageId, ms);
+                    }
+                }
+            }
+            finally
+            {
+                File.Delete(filename);
+            }
+        }
+
+        private byte[] GetRandomZipFile()
+        {
+            var rnd = new Random();
+
+            using (var ms = new MemoryStream())
+            {
+                using (var zip = new ZipOutputStream(ms))
+                {
+                    zip.PutNextEntry(new ZipEntry("file"));
+                    var buffer = new byte[10000];
+                    rnd.NextBytes(buffer);
+                    zip.Write(buffer, 0, buffer.Length);
+                    zip.Flush();
+                    return ms.ToArray();
+                }
+            }
+        }
     }
 }

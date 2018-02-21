@@ -25,7 +25,8 @@ namespace SeaMonkey
 
             step.Actions[0].Properties.Clear();
             step.Actions[0].Properties["Octopus.Action.Script.ScriptSource"] = "Inline";
-            step.Actions[0].Properties["Octopus.Action.Script.ScriptBody"] = "'Hello World'";
+            step.Actions[0].Properties["Octopus.Action.Script.ScriptBody"] = @"Write-Host 'Hello World'
+            Start-Sleep 1";
             step.Properties["Octopus.Action.TargetRoles"] = "InstallStuff";
             return step;
         }
@@ -44,7 +45,8 @@ namespace SeaMonkey
 
             step.Actions[0].Properties.Clear();
             step.Actions[0].Properties["Octopus.Action.Script.ScriptSource"] = "Inline";
-            step.Actions[0].Properties["Octopus.Action.Script.ScriptBody"] = "$OctopusParameters.GetEnumerator() | % { $_.Key + '=' + $_.Value }";
+            step.Actions[0].Properties["Octopus.Action.Script.ScriptBody"] = @"$OctopusParameters.GetEnumerator() | % { $_.Key + '=' + $_.Value }
+            Start-Sleep 1";
             for(int x = 1; x < 20; x++)
                 step.Actions[0].Properties[$"FillerProperty{x:000}"] = AReallyBigString;
             step.Properties["Octopus.Action.TargetRoles"] = "InstallStuff";

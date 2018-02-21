@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Octopus.Client;
 using Octopus.Client.Model;
+using Octopus.Client.Model.Endpoints;
 using SeaMonkey.ProbabilitySets;
 using Serilog;
 
@@ -19,9 +20,10 @@ namespace SeaMonkey.Monkeys
         {
         }
 
-        public IntProbability ProjectsPerGroup { get; set; } = new LinearProbability(5, 15);
+        public IntProbability ProjectsPerGroup { get; set; } = new LinearProbability(3, 10);
         public IntProbability ExtraChannelsPerProject { get; set; } = new DiscretProbability(0, 1, 1, 5);
-        public IntProbability EnvironmentsPerGroup { get; set; } = new FibonacciProbability();
+        public IntProbability EnvironmentsPerGroup { get; set; } = new LinearProbability(2,5);
+        IntProbability MachinesToCreate = new DiscretProbability(5,8,8,10,12,12,15,15,15);
 
         public void CreateProjectGroups(int numberOfGroups)
         {
@@ -30,6 +32,8 @@ namespace SeaMonkey.Monkeys
             for (var x = currentCount; x <= numberOfGroups; x++)
                 Create(x, machines);
         }
+
+    
 
         private void Create(int id, IReadOnlyList<MachineResource> machines)
         {
@@ -100,6 +104,8 @@ namespace SeaMonkey.Monkeys
                 })
             );
 
+            machines = EnsureMachines(envs[0], machines);
+
             lock(this)
             {
                 foreach (var env in envs)
@@ -111,6 +117,25 @@ namespace SeaMonkey.Monkeys
                 }
             }
             return envs;
+        }
+        
+        private IReadOnlyList<MachineResource> EnsureMachines(EnvironmentResource env, IReadOnlyList<MachineResource> machines)
+        {
+            const int minNumberOfMachines = 5;
+            if (machines.Count >= minNumberOfMachines)
+                return machines;
+            
+            var toCreate = MachinesToCreate.Get();
+
+            Enumerable.Range(machines.Count, toCreate - machines.Count)
+                .AsParallel()
+                .WithDegreeOfParallelism(5)
+                .ForAll(n =>
+                {
+                    Repository.Machines.CreateOrModify($"Cloud-{n:000}", new CloudRegionEndpointResource(), new[] {env}, new[] { "InstallStuff" });
+                });
+
+            return Repository.Machines.FindAll();
         }
 
 
@@ -136,9 +161,15 @@ namespace SeaMonkey.Monkeys
                 ProjectGroupId = group.Id,
                 LifecycleId = lifecycle.Id,
             });
-
-            using(var ms = new MemoryStream(CreateLogo(project.Name, "monsterid")))
-                Repository.Projects.SetLogo(project, project.Name + ".png", ms);
+            try
+            {
+                using (var ms = new MemoryStream(CreateLogo(project.Name, "monsterid")))
+                    Repository.Projects.SetLogo(project, project.Name + ".png", ms);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("Could not set logo {error}", ex.Message);
+            }
 
             return project;
         }

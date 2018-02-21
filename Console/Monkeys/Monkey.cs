@@ -10,7 +10,7 @@ namespace SeaMonkey.Monkeys
     {
         protected readonly OctopusRepository Repository;
 
-        public IntProbability StepsPerProject { get; set; } = new FibonacciProbability(FibonacciProbability.Limit._5, FibonacciProbability.Limit._21);
+        public IntProbability StepsPerProject { get; set; } = new LinearProbability(2, 10);
         public IntProbability VariablesPerProject { get; set; } = new DiscretProbability(10, 20, 100);
 
 

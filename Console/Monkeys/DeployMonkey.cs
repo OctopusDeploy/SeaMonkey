@@ -108,7 +108,7 @@ namespace SeaMonkey.Monkeys
                 .WithDegreeOfParallelism(10)
                 .ForAll(item =>
                 {
-                    if (item.ProjectInfo.LatestRelease == null || ChanceOfANewRelease.Get())
+                    //if (item.ProjectInfo.LatestRelease == null || ChanceOfANewRelease.Get())
                         CreateRelease(item.ProjectInfo);
 
                     CreateDeployment(item.ProjectInfo, item.EnvironmentId);
@@ -163,8 +163,9 @@ namespace SeaMonkey.Monkeys
 
         private void CreateRelease(ProjectInfo projectInfo)
         {
-            if (ChanceOfAProcessChangeOnNewRelease.Get())
+            //if (ChanceOfAProcessChangeOnNewRelease.Get())
                 projectInfo.DeploymentProcess = UpdateDeploymentProcess(projectInfo.Project);
+            
 
             var release = new ReleaseResource()
             {
@@ -175,7 +176,7 @@ namespace SeaMonkey.Monkeys
                     .Steps
                     .SelectMany(s => s.Actions)
                     .Where(a => a.Properties.ContainsKey("Octopus.Action.Package.NuGetPackageId"))
-                    .Select(a => new SelectedPackage(a.Name, "3.2.4"))
+                    .Select(a => new SelectedPackage(a.Name, "2.1.0"))
                     .ToList()
             };
             projectInfo.LatestRelease = Repository.Releases.Create(release);
