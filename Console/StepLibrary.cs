@@ -11,7 +11,7 @@ namespace SeaMonkey
             GetLargeStep
         };
 
-        private static DeploymentStepResource GetSimpleScriptStep(int id)
+        public static DeploymentStepResource GetSimpleScriptStep(int id)
         {
             var step = new DeploymentStepResource()
             {
@@ -24,9 +24,23 @@ namespace SeaMonkey
             });
 
             step.Actions[0].Properties.Clear();
+            step.Actions[0].Properties["Octopus.Action.RunOnServer"] = "true";
             step.Actions[0].Properties["Octopus.Action.Script.ScriptSource"] = "Inline";
-            step.Actions[0].Properties["Octopus.Action.Script.ScriptBody"] = "'Hello World'";
-            step.Properties["Octopus.Action.TargetRoles"] = "InstallStuff";
+            step.Actions[0].Properties["Octopus.Action.Script.ScriptBody"] = @"Write-Host 'Start'; 
+            Sleep -s 5;  
+
+            Write-Host 'Hello World'; 
+            Sleep -s 10; 
+
+            Write-Host 'New-Artifact'; 
+            New-OctopusArtifact -Path 'C:\Windows\System32\drivers\etc\hosts' -Name 'hosts.txt'; 
+            Sleep -s 15;
+
+            Write-Host 'Set-Variable'; 
+            Set-OctopusVariable -name 'Variable' -value $OctopusParameters['Octopus.Machine.Name']
+            Sleep -s 5;
+            ";
+            //step.Properties["Octopus.Action.TargetRoles"] = "InstallStuff";
             return step;
         }
 

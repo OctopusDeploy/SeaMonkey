@@ -27,18 +27,18 @@ namespace SeaMonkey.Monkeys
 
         public void CreateProjectGroups(int numberOfGroups)
         {
-            var machines = GetMachines();
+           // var machines = GetMachines();
             var currentCount = Repository.ProjectGroups.FindAll().Count();
             for (var x = currentCount; x <= numberOfGroups; x++)
-                Create(x, machines);
+                Create(x);
         }
 
-        private void Create(int id, IReadOnlyList<MachineResource> machines)
+        public void Create(int id)
         {
-            var envs = CreateEnvironments(id, machines);
+            var envs = CreateEnvironment(id);
             var lc = CreateLifecycle(id, envs);
             var group = CreateProjectGroup(id);
-            CreateProjects(id, group, lc);
+            CreateProject(id, group, lc);
         }
 
 
@@ -52,21 +52,21 @@ namespace SeaMonkey.Monkeys
         }
 
 
-        private void CreateProjects(int prefix, ProjectGroupResource group, LifecycleResource lifecycle)
+        private void CreateProject(int prefix, ProjectGroupResource group, LifecycleResource lifecycle)
         {
-            var numberOfProjects = ProjectsPerGroup.Get();
-            Log.Information("Creating {n} projects for {group}", numberOfProjects, group.Name);
-            Enumerable.Range(1, numberOfProjects)
-                .AsParallel()
-                .ForAll(p =>
-                    {
-                        var project = CreateProject(group, lifecycle, $"-{prefix:000}-{p:00}");
+           // var numberOfProjects = ProjectsPerGroup.Get();
+            Log.Information("Creating {n} projects for {group}", 1, group.Name);
+            //Enumerable.Range(1, 2)
+              //  .AsParallel()
+              //  .ForAll(p =>
+//                    {
+                        var project = CreateProject(group, lifecycle, "");
                         UpdateDeploymentProcess(project);
-                        CreateChannels(project, lifecycle);
-                        SetVariables(project);
+                        //CreateChannels(project, lifecycle);
+                        //SetVariables(project);
                         Log.Information("Created project {name}", project.Name);
-                    }
-                );
+              //      }
+              //  );
         }
 
         private void CreateChannels(ProjectResource project, LifecycleResource lifecycle)
@@ -87,22 +87,22 @@ namespace SeaMonkey.Monkeys
                 );
         }
 
-        private EnvironmentResource[] CreateEnvironments(int prefix, IReadOnlyList<MachineResource> machines)
+        private EnvironmentResource[] CreateEnvironment(int prefix)
         {
-            var envs = new EnvironmentResource[EnvironmentsPerGroup.Get()];
-            Enumerable.Range(1, envs.Length)
-                .AsParallel()
-                .ForAll(e =>
-                {
-                    var name = $"Env-{prefix:000}-{e}";
+            var envs = new EnvironmentResource[1];
+         //   Enumerable.Range(1, envs.Length)
+              //  .AsParallel()
+              //  .ForAll(e =>
+               // {
+                    var name = $"Test";
                     var envRes = Repository.Environments.FindByName(name);
-                    envs[e - 1] = envRes ?? Repository.Environments.Create(new EnvironmentResource()
+                    envs[0] = envRes ?? Repository.Environments.Create(new EnvironmentResource()
                     {
                         Name = name
                     });
-                });
+              //  });
 
-            lock(this)
+           /* lock(this)
             {
                 foreach (var env in envs)
                 {
@@ -114,7 +114,7 @@ namespace SeaMonkey.Monkeys
                         Repository.Machines.Modify(machine);
                     }
                 }
-            }
+            } */
             return envs;
         }
 

@@ -68,13 +68,13 @@ namespace SeaMonkey.Monkeys
                 var filteredItems = projectEnvs.Where(e => filter(e.ProjectInfo, e.EnvironmentId)).ToArray();
                 var item = filteredItems[_rnd.Next(0, filteredItems.Length)];
 
-                if (item.ProjectInfo.LatestRelease == null || ChanceOfANewRelease.Get())
-                    CreateRelease(item.ProjectInfo);
+                //if (item.ProjectInfo.LatestRelease == null || ChanceOfANewRelease.Get())
+                CreateRelease(item.ProjectInfo);
 
                 CreateDeployment(item.ProjectInfo, item.EnvironmentId);
 
                 Log.Write(cnt % 10 == 0 ? LogEventLevel.Information : LogEventLevel.Verbose, "{description}: {n} deployments", description, cnt);
-                Thread.Sleep(delayBetween);
+               // Thread.Sleep(delayBetween);
             }
         }
 
@@ -198,13 +198,17 @@ namespace SeaMonkey.Monkeys
 
         public void CreateDeployment(ProjectInfo projectInfo, string environmentId)
         {
-            Repository.Deployments.Create(new DeploymentResource()
+            var deployment = Repository.Deployments.Create(new DeploymentResource()
             {
                 ProjectId = projectInfo.Project.Id,
                 ReleaseId = projectInfo.LatestRelease.Id,
                 EnvironmentId = environmentId,
                 ForcePackageRedeployment = true
             });
+
+            //var deploymentTask = Repository.Tasks.Get(deployment.TaskId);
+           // Thread.Sleep(TimeSpan.FromSeconds(60));
+           // Repository.Tasks.WaitForCompletion(deploymentTask, 5, 5);
         }
     }
 

@@ -40,8 +40,8 @@ namespace SeaMonkey.Monkeys
             var process = Repository.DeploymentProcesses.Get(project.DeploymentProcessId);
             process.Steps.Clear();
             var numberOfSteps = StepsPerProject.Get();
-            for (var x = 1; x <= numberOfSteps; x++)
-                process.Steps.Add(StepLibrary.Random(x));
+            for (var x = 1; x <= 1; x++)
+                process.Steps.Add(StepLibrary.GetSimpleScriptStep(1));
 
             return Repository.DeploymentProcesses.Modify(process);
         }
