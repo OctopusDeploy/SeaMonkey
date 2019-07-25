@@ -29,7 +29,7 @@ namespace SeaMonkey
             {
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Information()
-                    .WriteTo.ColoredConsole()
+                    .WriteTo.LiterateConsole()
                     .CreateLogger();
 
                 var endpoint = new OctopusServerEndpoint(server, apiKey);

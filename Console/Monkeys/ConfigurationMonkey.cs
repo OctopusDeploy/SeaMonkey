@@ -2,6 +2,7 @@
 using Octopus.Client;
 using Octopus.Client.Model;
 using System;
+using System.Collections.Generic;
 
 namespace SeaMonkey.Monkeys
 {
@@ -117,9 +118,11 @@ namespace SeaMonkey.Monkeys
                     Name = "UserRole-" + prefix.ToString("000"),
                     Description = "They're robots Morty! It's okay to shoot them! They're just robots!",
                     CanBeDeleted = true,
-                    SupportedRestrictions = new System.Collections.Generic.List<string>(),
-                    PermissionDescriptions = new System.Collections.Generic.List<string>(),
-                    GrantedPermissions = new System.Collections.Generic.List<Permission>(),
+                    SupportedRestrictions = new List<string>(),
+                    SpacePermissionDescriptions = new List<string>(),
+                    GrantedSpacePermissions = new List<Permission>(),
+                    SystemPermissionDescriptions = new List<string>(),
+                    GrantedSystemPermissions = new List<Permission>()
                 });
         }
 
