@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SeaMonkey": {
+      "commandName": "Project",
+      "commandLineArgs": "http://localhost:8065 API-OVICBI2SA49POJNDFWUU4XLH6UM true false false false true false false true"
+    }
+  }
+}

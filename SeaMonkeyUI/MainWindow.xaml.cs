@@ -26,11 +26,12 @@ namespace SeaMonkeyUI
                 RunLibraryMonkey = false,
                 RunVariableMonkey = false,
                 RunTenantMonkey = false,
+                RunRunbookMonkey = false,
             };
 
             var args = Environment.GetCommandLineArgs();
             // ReSharper disable once InvertIf
-            if (args.Length == 10)
+            if (args.Length == 11)
             {
                 // args[0] is reserved for the exe itself.
                 Model.ServerUrl = args[1];
@@ -42,6 +43,7 @@ namespace SeaMonkeyUI
                 Model.RunInfrastructureMonkey = args[7].ToLower() == "true";
                 Model.RunLibraryMonkey = args[8].ToLower() == "true";
                 Model.RunVariableMonkey = args[9].ToLower() == "true";
+                Model.RunRunbookMonkey = args[10].ToLower() == "true";
             }
 
             FormLoaded();
@@ -58,6 +60,7 @@ namespace SeaMonkeyUI
             runLibrary.IsChecked = Model.RunLibraryMonkey;
             runTenant.IsChecked = Model.RunTenantMonkey;
             runVariables.IsChecked = Model.RunVariableMonkey;
+            runRunbooks.IsChecked = Model.RunRunbookMonkey;
         }
 
         protected override void OnClosed(EventArgs e)
@@ -73,7 +76,7 @@ namespace SeaMonkeyUI
             var startInfo = new ProcessStartInfo("SeaMonkey.exe")
             {
                 WorkingDirectory = GetSeaMonkeyConsoleExePath(),
-                Arguments = $"{this.Model.ServerUrl} {this.Model.ServerApiKey} {this.Model.RunSetupMonkey} {this.Model.RunTenantMonkey} {this.Model.RunDeployMonkey} {this.Model.RunConfigurationMonkey} {this.Model.RunInfrastructureMonkey} {this.Model.RunLibraryMonkey} {this.Model.RunVariableMonkey}"
+                Arguments = $"{this.Model.ServerUrl} {this.Model.ServerApiKey} {this.Model.RunSetupMonkey} {this.Model.RunTenantMonkey} {this.Model.RunDeployMonkey} {this.Model.RunConfigurationMonkey} {this.Model.RunInfrastructureMonkey} {this.Model.RunLibraryMonkey} {this.Model.RunVariableMonkey} {this.Model.RunRunbookMonkey}"
             };
             using (ConsoleProcess = Process.Start(startInfo))
             {
@@ -126,6 +129,11 @@ namespace SeaMonkeyUI
             this.Model.RunVariableMonkey = runVariables.IsChecked ?? false;
         }
 
+        private void RunRunbooks_Checked(object sender, RoutedEventArgs e)
+        {
+            this.Model.RunRunbookMonkey = runRunbooks.IsChecked ?? false;
+        }
+
         #endregion
 
         #region Helpers
@@ -142,6 +150,7 @@ namespace SeaMonkeyUI
             public bool RunInfrastructureMonkey { get; set; }
             public bool RunLibraryMonkey { get; set; }
             public bool RunVariableMonkey { get; set; }
+            public bool RunRunbookMonkey { get; set; }
         }
 
         private static string GetSeaMonkeyConsoleExePath()

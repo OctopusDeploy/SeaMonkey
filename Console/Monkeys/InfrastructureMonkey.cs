@@ -13,14 +13,14 @@ namespace SeaMonkey.Monkeys
     public class InfrastructureMonkey : Monkey
     {
         private IntProbability RolesPerMachine { get; set; } = new LinearProbability(0, 4);
-        public IntProbability EnvironmentsPerGroup { get; set; } = new FibonacciProbability();
+        public IntProbability EnvironmentsPerGroup { get; set; } = new LinearProbability(40, 40);
         private readonly string[] PossibleRoles = new string[] {
             "Rick",
             "Morty",
             "Mr. Meeseeks",
             "Roy's Carpet Store",
-            "InstallStuff", // <- need to have this role somewhere for setup.
         };
+        private readonly string installRole = "InstallStuff";
         const string WorkerPoolPrefix = "GarblovianWorkerPool-";
         const string WorkerPrefix = "RickAndMortyWorker-";
 
@@ -188,6 +188,7 @@ namespace SeaMonkey.Monkeys
 
             var rolesPerMachine = RolesPerMachine.Get();
             machine.Roles.Add("cloud-region"); // All machines get this role.
+            machine.Roles.Add(installRole);
             for (int i = 0; i < rolesPerMachine; i++)
             {
                 if (i < this.PossibleRoles.Length)

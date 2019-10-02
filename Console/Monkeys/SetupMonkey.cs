@@ -21,9 +21,10 @@ namespace SeaMonkey.Monkeys
         {
         }
 
-        public IntProbability ProjectsPerGroup { get; set; } = new LinearProbability(10, 20);
+        public IntProbability ProjectsPerGroup { get; set; } = new LinearProbability(1, 1);
         public IntProbability ExtraChannelsPerProject { get; set; } = new DiscretProbability(0, 1, 1, 5);
-        public IntProbability EnvironmentsPerGroup { get; set; } = new FibonacciProbability();
+        public IntProbability EnvironmentsPerGroup { get; set; } = new LinearProbability(1, 1);
+        public IntProbability RunbooksPerProject { get; set; } = new DiscretProbability(70);
 
         public void CreateProjectGroups(int numberOfGroups)
         {
@@ -41,7 +42,6 @@ namespace SeaMonkey.Monkeys
             CreateProjects(id, group, lc);
         }
 
-
         private ProjectGroupResource CreateProjectGroup(int prefix)
         {
             return
@@ -50,7 +50,6 @@ namespace SeaMonkey.Monkeys
                     Name = "Group-" + prefix.ToString("000")
                 });
         }
-
 
         private void CreateProjects(int prefix, ProjectGroupResource group, LifecycleResource lifecycle)
         {
@@ -63,6 +62,7 @@ namespace SeaMonkey.Monkeys
                         var project = CreateProject(group, lifecycle, $"-{prefix:000}-{p:00}");
                         UpdateDeploymentProcess(project);
                         CreateChannels(project, lifecycle);
+                        CreateRunbooks(project);
                         SetVariables(project);
                         Log.Information("Created project {name}", project.Name);
                     }
@@ -85,6 +85,24 @@ namespace SeaMonkey.Monkeys
                         IsDefault = false
                     })
                 );
+        }
+
+        private void CreateRunbooks(ProjectResource project)
+        {
+            var numberOfRunbooks = RunbooksPerProject.Get();
+
+            Enumerable.Range(1, numberOfRunbooks)
+                .AsParallel()
+                .ForAll(p =>
+                {
+                    var runbook = Repository.Runbooks.Create(new RunbookResource()
+                    {
+                        ProjectId = project.Id,
+                        Name = "Runbook " + p.ToString("000"),
+                        Description = "",
+                    });
+                    UpdateRunbookSteps(runbook);
+                });
         }
 
         private EnvironmentResource[] CreateEnvironments(int prefix, IReadOnlyList<MachineResource> machines)

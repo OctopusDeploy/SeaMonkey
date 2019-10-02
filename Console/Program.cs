@@ -12,8 +12,8 @@ namespace SeaMonkey
 
         private static void Main(string[] args)
         {
-            if (args.Length != 9)
-                throw new ApplicationException("Usage: SeaMonkey.exe <ServerUri> <ApiKey> <RunSetupMonkey> <RunTenantMonkey> <RunDeployMonkey> <RunConfigurationMonkey> <RunInfrastructureMonkey> <RunLibraryMonkey> <RunVariablesMonkey>");
+            if (args.Length != 10)
+                throw new ApplicationException("Usage: SeaMonkey.exe <ServerUri> <ApiKey> <RunSetupMonkey> <RunTenantMonkey> <RunDeployMonkey> <RunConfigurationMonkey> <RunInfrastructureMonkey> <RunLibraryMonkey> <RunVariablesMonkey> <RunRunbookMonkey>");
 
             var server = args[0];
             var apiKey = args[1];
@@ -24,6 +24,7 @@ namespace SeaMonkey
             var runInfrastructureMonkey = args[6].ToLower() == "true";
             var runLibraryMonkey = args[7].ToLower() == "true";
             var runVariablesMonkey = args[8].ToLower() == "true";
+            var runRunbookMonkey = args[9].ToLower() == "true";
 
             try
             {
@@ -41,7 +42,8 @@ namespace SeaMonkey
                     runInfrastructureMonkey,
                     runLibraryMonkey,
                     runTenantMonkey,
-                    runVariablesMonkey);
+                    runVariablesMonkey,
+                    runRunbookMonkey);
             }
             catch (Exception ex)
             {
@@ -61,7 +63,8 @@ namespace SeaMonkey
             bool runInfrastructureMonkey,
             bool runLibraryMonkey,
             bool runTenantMonkey, 
-            bool runVariablesMonkey)
+            bool runVariablesMonkey,
+            bool runRunbookMonkey)
         {
             Console.WriteLine("Starting monkey business...");
 
@@ -72,19 +75,19 @@ namespace SeaMonkey
                 new SetupMonkey(repository)
                 {
                     StepsPerProject = new LinearProbability(1, 3)
-                }.CreateProjectGroups(10);
+                }.CreateProjectGroups(1);
             }
 
             if (runTenantMonkey)
             {
-                new TenantMonkey(repository).Create(50);
+                new TenantMonkey(repository).Create(5);
             }
 
             if (runInfrastructureMonkey)
             {
                 Console.WriteLine("Running infrastructure monkey...");
                 new InfrastructureMonkey(repository)
-                    .CreateRecords(7, 7, 7, 70, 2, 2);
+                    .CreateRecords(2, 2, 2, 2, 2, 2);
             }
 
             if (runDeployMonkey)
@@ -115,7 +118,14 @@ namespace SeaMonkey
                 Console.WriteLine("Running variables monkey...");
                 new VariablesMonkey(repository)
                     .CreateVariables(3, 10, 50, 100, 200);
-                    //.CleanupVariables();
+                //.CleanupVariables();
+            }
+
+            if (runRunbookMonkey)
+            {
+                Console.WriteLine("Running runbook monkey...");
+                new RunbookMonkey(repository)
+                    .RunForAllRunbooks(maxNumberOfRunbookRuns: 100);
             }
         }
     }

@@ -10,8 +10,8 @@ namespace SeaMonkey.Monkeys
     {
         protected readonly OctopusRepository Repository;
 
-        public IntProbability StepsPerProject { get; set; } = new FibonacciProbability(FibonacciProbability.Limit._5, FibonacciProbability.Limit._21);
-        public IntProbability VariablesPerProject { get; set; } = new DiscretProbability(10, 20, 100);
+        public IntProbability StepsPerProject { get; set; } = new FibonacciProbability(FibonacciProbability.Limit._1, FibonacciProbability.Limit._2);
+        public IntProbability VariablesPerProject { get; set; } = new DiscretProbability(1);
 
 
         protected Monkey(OctopusRepository repository)
@@ -44,6 +44,17 @@ namespace SeaMonkey.Monkeys
                 process.Steps.Add(StepLibrary.Random(x));
 
             return Repository.DeploymentProcesses.Modify(process);
+        }
+
+        protected RunbookStepsResource UpdateRunbookSteps(RunbookResource runbook)
+        {
+            var runbookSteps = Repository.RunbookSteps.Get(runbook.RunbookStepsId);
+            runbookSteps.Steps.Clear();
+            var numberOfSteps = StepsPerProject.Get();
+            for (var x = 1; x <= numberOfSteps; x++)
+                runbookSteps.Steps.Add(StepLibrary.Random(x));
+
+            return Repository.RunbookSteps.Modify(runbookSteps);
         }
 
         protected void SetVariables(ProjectResource project)
