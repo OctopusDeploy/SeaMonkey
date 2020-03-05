@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Autofac;
 using Octopus.Client;
+using SeaMonkey.Commands;
 using SeaMonkey.Monkeys;
 using SeaMonkey.ProbabilitySets;
 using Serilog;
@@ -12,6 +16,16 @@ namespace SeaMonkey
 
         private static void Main(string[] args)
         {
+            var container = BuildContainer(args);
+            var commandLocator = container.Resolve<ICommandLocator>();
+            var first = GetFirstArgument(args);
+            var command = GetCommand(first, commandLocator, args);
+            if (command != null)
+            {
+                command.Execute(args.Skip(1).ToArray()).Wait();
+                return;
+            }
+        
             if (args.Length != 9)
                 throw new ApplicationException("Usage: SeaMonkey.exe <ServerUri> <ApiKey> <RunSetupMonkey> <RunTenantMonkey> <RunDeployMonkey> <RunConfigurationMonkey> <RunInfrastructureMonkey> <RunLibraryMonkey> <RunVariablesMonkey>");
 
@@ -52,6 +66,14 @@ namespace SeaMonkey
                 Console.WriteLine("Done. Press any key to exit");
                 Console.ReadKey();
             }
+        }
+
+        private static IContainer BuildContainer(string[] args)
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterAssemblyTypes(typeof(Program).Assembly).As<ICommand>().AsSelf();
+            builder.RegisterType<CommandLocator>().As<ICommandLocator>().SingleInstance();
+            return builder.Build();
         }
 
         private static void RunMonkeys(OctopusRepository repository,
@@ -117,6 +139,21 @@ namespace SeaMonkey
                     .CreateVariables(3, 10, 50, 100, 200);
                     //.CleanupVariables();
             }
+        }
+        
+        static string GetFirstArgument(IEnumerable<string> args)
+            => (args.FirstOrDefault() ?? string.Empty).ToLowerInvariant().TrimStart('-', '/');
+        
+        static ICommand GetCommand(string first, ICommandLocator commandLocator, string[] args)
+        {
+            if (string.IsNullOrWhiteSpace(first))
+                return commandLocator.Find("help", args);
+
+            var command = commandLocator.Find(first, args);
+            if (command == null)
+                throw new CommandException("Error: Unrecognized command '" + first + "'");
+
+            return command;
         }
     }
 }

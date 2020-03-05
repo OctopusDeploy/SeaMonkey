@@ -10,6 +10,7 @@
       <None Remove="Monkeys\pickle-rick.pfx" />
     </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="5.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="Octopus.Client" Version="7.1.4" />
     <PackageReference Include="Polly" Version="7.1.0" />
