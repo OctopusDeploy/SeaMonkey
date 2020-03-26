@@ -54,4 +54,18 @@ namespace SeaMonkey.ProbabilitySets
             return _values[Program.Rnd.Next(0, _values.Length)];
         }
     }
+
+    public class StaticValue : IntProbability
+    {
+        private readonly int _value;
+
+        public StaticValue(int value)
+        {
+            _value = value;
+        }
+        public override int Get()
+        {
+            return _value;
+        }
+    }
 }

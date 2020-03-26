@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Design;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -7,19 +8,6 @@ using SeaMonkey.Models;
 
 namespace SeaMonkey.Commands
 {
-    public abstract class CommandBase : ICommand
-    {
-        protected Options Options { get; } = new Options();
-
-        public async Task Execute(string[] args)
-        {
-            Options.Parse(args);
-            await Execute();
-        }
-
-        public abstract Task Execute();
-    }
-    
     [Command("create-empty-profile")]
     public class CreateProfileCommand : CommandBase
     {

@@ -46,7 +46,10 @@ namespace SeaMonkey.Monkeys
             };
 
             Log.Information("Creating containing project group");
-            projectGroupResource = Repository.ProjectGroups.Create(projectGroupResource);
+            if (Repository.ProjectGroups.FindByName(projectGroupResource.Name) == null)
+            {
+                projectGroupResource = Repository.ProjectGroups.Create(projectGroupResource);
+            }
 
             var lifecycle = Repository.Lifecycles.FindAll().First();
 
@@ -83,6 +86,10 @@ namespace SeaMonkey.Monkeys
                 ProjectGroupId = projectGroupResource.Id,
                 Name = $"Variables (Size {variableSizePadded})"
             };
+            var p = Repository.Projects.FindByName(project.Name);
+            
+            if (p != null) return p;
+            
             Log.Information("Creating project {projectName}", project.Name);
             return Repository.Projects.Create(project);
         }

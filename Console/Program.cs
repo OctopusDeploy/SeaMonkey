@@ -22,7 +22,15 @@ namespace SeaMonkey
             var command = GetCommand(first, commandLocator, args);
             if (command != null)
             {
-                command.Execute(args.Skip(1).ToArray()).Wait();
+                try
+                {
+                    command.Execute(args.Skip(1).ToArray()).Wait();
+                }
+                catch (Exception exception)
+                {
+                    Log.Error(exception, "Something went wrong");
+                }
+
                 return;
             }
         
@@ -41,10 +49,7 @@ namespace SeaMonkey
 
             try
             {
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Information()
-                    .WriteTo.LiterateConsole()
-                    .CreateLogger();
+                
 
                 var endpoint = new OctopusServerEndpoint(server, apiKey);
                 var repository = new OctopusRepository(endpoint);
@@ -70,9 +75,15 @@ namespace SeaMonkey
 
         private static IContainer BuildContainer(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.LiterateConsole()
+                .CreateLogger();
+            
             var builder = new ContainerBuilder();
             builder.RegisterAssemblyTypes(typeof(Program).Assembly).As<ICommand>().AsSelf();
             builder.RegisterType<CommandLocator>().As<ICommandLocator>().SingleInstance();
+            builder.RegisterInstance(Log.Logger).As<ILogger>().SingleInstance();
             return builder.Build();
         }
 

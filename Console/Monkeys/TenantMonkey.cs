@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Octopus.Client;
 using Octopus.Client.Model;
 using SeaMonkey.ProbabilitySets;
@@ -25,10 +26,11 @@ namespace SeaMonkey.Monkeys
         {
             var projects = GetProjects();
             var lifecycleIndex = Repository.Lifecycles.FindAll().ToDictionary(t => t.Id);
+            var allTenants = Repository.Tenants.GetAll();
 
             Log.Information("Creating {n} tenants", numberOfTenants);
 
-            for (var t = 1; t <= numberOfTenants; t++)
+            for (var t = allTenants.Count + 1; t <= numberOfTenants; t++)
             {
                 CreateTenant(projects, lifecycleIndex, t);
             }

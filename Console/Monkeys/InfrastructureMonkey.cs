@@ -12,7 +12,7 @@ namespace SeaMonkey.Monkeys
 {
     public class InfrastructureMonkey : Monkey
     {
-        private IntProbability RolesPerMachine { get; set; } = new LinearProbability(0, 4);
+        public IntProbability RolesPerMachine { get; set; } = new LinearProbability(0, 4);
         public IntProbability EnvironmentsPerGroup { get; set; } = new FibonacciProbability();
         private readonly string[] PossibleRoles = new string[] {
             "Rick",

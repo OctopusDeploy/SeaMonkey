@@ -44,11 +44,14 @@ namespace SeaMonkey.Monkeys
 
         private ProjectGroupResource CreateProjectGroup(int prefix)
         {
-            return
-                Repository.ProjectGroups.Create(new ProjectGroupResource()
-                {
-                    Name = "Group-" + prefix.ToString("000")
-                });
+            var name = "Group-" + prefix.ToString("000");
+            var projectGroup = Repository.ProjectGroups.FindByName(name);
+            if (projectGroup == null)
+            {
+                return Repository.ProjectGroups.Create(new ProjectGroupResource {Name = name});
+            }
+
+            return projectGroup;
         }
 
 
